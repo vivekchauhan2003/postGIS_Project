@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>City Map</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    #form-container { padding: 1rem; background: #f4f4f4; }
+    #map { height: 90vh; }
+  </style>
+</head>
+<body>
+
+<div id="form-container">
+  <form id="polygonForm">
+    <label for="polygonText">Enter Polygon Coordinates (lon lat):</label>
+    <input type="text" id="polygonText" name="polygonText" size="80" placeholder="Example: 70 25, 90 25, 90 30, 70 30">
+    <button type="submit">Draw</button>
+  </form>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const form = document.getElementById('polygonForm');
+  const map = L.map('map').setView([27.5, 78], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  let polygonLayer;
+  let markerGroup = L.layerGroup().addTo(map);
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const polygonText = document.getElementById('polygonText').value.trim();
+    if (!polygonText) {
+      alert("Please enter polygon coordinates.");
+      return;
+    }
+
+    fetch(`http://localhost:8080/postGISProject/testclass?polygonText=${encodeURIComponent(polygonText)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (polygonLayer) map.removeLayer(polygonLayer);
+        markerGroup.clearLayers();
+
+        const polygon = data.polygon.map(coord => [coord[0], coord[1]]);
+        polygonLayer = L.polygon(polygon, { color: 'blue', fillOpacity: 0.1 }).addTo(map);
+        map.fitBounds(polygonLayer.getBounds());
+
+        data.cities.forEach(city => {
+          const marker = L.marker([city.lat, city.lon])
+            .bindPopup(`<b>${city.name}</b><br>Lat: ${city.lat}<br>Lon: ${city.lon}`);
+          markerGroup.addLayer(marker);
+        });
+      })
+      .catch(err => {
+        console.error("Error:", err);
+        alert("Something went wrong. Check the server or input format.");
+      });
+  });
+</script>
+
+</body>
+</html>

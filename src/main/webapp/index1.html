@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PostGIS Polygon Query Visualization</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<h3>🗺️ Cities Inside Polygon (PostGIS ST_Within)</h3>
+<div id="map"></div>
+
+<script>
+  // Initialize map centered in North India
+  const map = L.map('map').setView([27.0, 80.0], 6);
+
+  // Add OpenStreetMap tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18
+  }).addTo(map);
+
+  // Polygon: (70 25, 90 25, 90 30, 70 30, 70 25)
+  const polygon = L.polygon([
+    [25, 70],
+    [25, 90],
+    [30, 90],
+    [30, 70],
+    [25, 70]
+  ], {
+    color: 'blue',
+    fillColor: '#0af',
+    fillOpacity: 0.2
+  }).addTo(map).bindPopup("Query Zone");
+
+  // Markers inside polygon
+  const cities = [
+    { name: "Delhi", lat: 28.7041, lon: 77.1025 },
+    { name: "Gurugram", lat: 28.4595, lon: 77.0266 },
+    { name: "Mainpuri", lat: 27.2256, lon: 79.0270 },
+    { name: "Agra", lat: 27.1767, lon: 78.0081 },
+    { name: "Lucknow", lat: 26.8467, lon: 80.9462 },
+    { name: "Fatehgarh", lat: 27.3661, lon: 79.6354 }
+  ];
+
+  cities.forEach(city => {
+    L.marker([city.lat, city.lon])
+      .addTo(map)
+      .bindPopup(city.name);
+  });
+
+</script>
+</body>
+</html>
