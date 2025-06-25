@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBUtil {
  private static final String URL = "jdbc:postgresql://localhost:5432/postgis_35_sample";
  private static final String USER = "postgres";
- private static final String PASSWORD = "17935";
+ private static final String PASSWORD = "XXXXX";
 
  static {
      try {
